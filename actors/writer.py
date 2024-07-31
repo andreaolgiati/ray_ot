@@ -2,6 +2,16 @@ import ray
 import random
 import uuid
 import time
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.prometheus import PrometheusSpanExporter
+
+# Initialize OTEL tracer
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+span_processor = BatchSpanProcessor(PrometheusSpanExporter())
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 @ray.remote
 class Writer:
@@ -11,18 +21,19 @@ class Writer:
         self.start_time = time.time()
 
     def add_row(self):
-        # Generate random features and result
-        features = [random.random() for _ in range(64)]
-        result = random.random()
+        with tracer.start_as_current_span("add_row"):
+            # Generate random features and result
+            features = [random.random() for _ in range(64)]
+            result = random.random()
 
-        # Add row to the table
-        row_id = ray.get(self.table_holder.add_row.remote(features, result))
+            # Add row to the table
+            row_id = ray.get(self.table_holder.add_row.remote(features, result))
 
-        # Increment total requests
-        self.total_requests += 1
+            # Increment total requests
+            self.total_requests += 1
 
-        # Deposit UUID into a set in the Ray object store
-        ray.get(self.table_holder.uuids.add.remote(row_id))
+            # Deposit UUID into a set in the Ray object store
+            ray.get(self.table_holder.uuids.add.remote(row_id))
 
     def run(self, rows_per_second):
         while True:

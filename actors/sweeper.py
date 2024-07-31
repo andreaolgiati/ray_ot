@@ -1,5 +1,15 @@
 import ray
 import time
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.prometheus import PrometheusSpanExporter
+
+# Initialize OTEL tracer
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+span_processor = BatchSpanProcessor(PrometheusSpanExporter())
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 @ray.remote
 class Sweeper:
@@ -10,14 +20,15 @@ class Sweeper:
         self.start_time = time.time()
 
     def remove_old_rows(self):
-        # Remove rows older than the specified number of minutes
-        self.table_holder.conn.execute('''
-            DELETE FROM EVENTS
-            WHERE CREATIONTIME < NOW() - INTERVAL ? MINUTE
-        ''', (self.expiration_minutes,))
+        with tracer.start_as_current_span("remove_old_rows"):
+            # Remove rows older than the specified number of minutes
+            self.table_holder.conn.execute('''
+                DELETE FROM EVENTS
+                WHERE CREATIONTIME < NOW() - INTERVAL ? MINUTE
+            ''', (self.expiration_minutes,))
 
-        # Increment total requests
-        self.total_requests += 1
+            # Increment total requests
+            self.total_requests += 1
 
     def run(self):
         while True:

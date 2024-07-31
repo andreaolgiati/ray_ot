@@ -2,6 +2,7 @@ import pytest
 import ray
 from unittest.mock import Mock, patch
 from actors.reader import Reader
+from opentelemetry import trace
 
 @pytest.fixture
 def mock_table_holder():
@@ -16,6 +17,10 @@ def test_read_rows(reader, mock_table_holder):
     rows = reader.read_rows(True, 2)
     assert rows == [("row1",), ("row2",)]
     assert reader.total_requests == 1
+
+    # Verify OTEL logging
+    span = trace.get_current_span()
+    assert span.name == "read_rows"
 
 def test_run(reader, mock_table_holder):
     with patch.object(reader, 'read_rows', return_value=[("row1",), ("row2",)]) as mock_read_rows:
