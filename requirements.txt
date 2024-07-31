@@ -1,0 +1,4 @@
+ray
+duckdb
+pytest
+pytest-mock
