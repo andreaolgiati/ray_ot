@@ -1,6 +1,16 @@
 import ray
 import random
 import time
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.prometheus import PrometheusSpanExporter
+
+# Initialize OTEL tracer
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+span_processor = BatchSpanProcessor(PrometheusSpanExporter())
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 @ray.remote
 class Updater:
@@ -10,29 +20,30 @@ class Updater:
         self.start_time = time.time()
 
     def update_row(self):
-        # Get a random UUID from the table holder
-        row_id = ray.get(self.table_holder.get_random_uuid.remote())
+        with tracer.start_as_current_span("update_row"):
+            # Get a random UUID from the table holder
+            row_id = ray.get(self.table_holder.get_random_uuid.remote())
 
-        # Generate random IMPRESSION and IMPRESSIONTIME values
-        impression = True
-        impression_time = duckdb.query('SELECT NOW()').fetchone()[0]
+            # Generate random IMPRESSION and IMPRESSIONTIME values
+            impression = True
+            impression_time = duckdb.query('SELECT NOW()').fetchone()[0]
 
-        # Optionally generate ENGAGEMENT and ENGAGEMENTTIME values
-        engagement = None
-        engagement_time = None
-        if random.random() < 0.5:  # 50% probability
-            engagement = True
-            engagement_time = duckdb.query('SELECT NOW()').fetchone()[0]
+            # Optionally generate ENGAGEMENT and ENGAGEMENTTIME values
+            engagement = None
+            engagement_time = None
+            if random.random() < 0.5:  # 50% probability
+                engagement = True
+                engagement_time = duckdb.query('SELECT NOW()').fetchone()[0]
 
-        # Update the row in the table
-        self.table_holder.conn.execute('''
-            UPDATE EVENTS
-            SET IMPRESSION = ?, IMPRESSIONTIME = ?, ENGAGEMENT = ?, ENGAGEMENTTIME = ?
-            WHERE ID = ?
-        ''', (impression, impression_time, engagement, engagement_time, row_id))
+            # Update the row in the table
+            self.table_holder.conn.execute('''
+                UPDATE EVENTS
+                SET IMPRESSION = ?, IMPRESSIONTIME = ?, ENGAGEMENT = ?, ENGAGEMENTTIME = ?
+                WHERE ID = ?
+            ''', (impression, impression_time, engagement, engagement_time, row_id))
 
-        # Increment total requests
-        self.total_requests += 1
+            # Increment total requests
+            self.total_requests += 1
 
     def run(self, rows_per_second):
         while True:

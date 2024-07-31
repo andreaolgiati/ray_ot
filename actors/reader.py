@@ -1,5 +1,15 @@
 import ray
 import time
+from opentelemetry import trace
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.prometheus import PrometheusSpanExporter
+
+# Initialize OTEL tracer
+trace.set_tracer_provider(TracerProvider())
+tracer = trace.get_tracer(__name__)
+span_processor = BatchSpanProcessor(PrometheusSpanExporter())
+trace.get_tracer_provider().add_span_processor(span_processor)
 
 @ray.remote
 class Reader:
@@ -9,14 +19,15 @@ class Reader:
         self.start_time = time.time()
 
     def read_rows(self, impression_is_null, num_rows):
-        # Select rows based on the user-specified values
-        if impression_is_null:
-            query = "SELECT * FROM EVENTS WHERE IMPRESSION IS NULL LIMIT ?"
-        else:
-            query = "SELECT * FROM EVENTS WHERE IMPRESSION IS NOT NULL LIMIT ?"
-        rows = self.table_holder.conn.execute(query, (num_rows,)).fetchall()
-        self.total_requests += 1
-        return rows
+        with tracer.start_as_current_span("read_rows"):
+            # Select rows based on the user-specified values
+            if impression_is_null:
+                query = "SELECT * FROM EVENTS WHERE IMPRESSION IS NULL LIMIT ?"
+            else:
+                query = "SELECT * FROM EVENTS WHERE IMPRESSION IS NOT NULL LIMIT ?"
+            rows = self.table_holder.conn.execute(query, (num_rows,)).fetchall()
+            self.total_requests += 1
+            return rows
 
     def run(self, rows_per_second, impression_is_null, num_rows):
         while True:

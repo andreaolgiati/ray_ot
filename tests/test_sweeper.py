@@ -2,6 +2,7 @@ import pytest
 import ray
 from unittest.mock import Mock, patch
 from actors.sweeper import Sweeper
+from opentelemetry import trace
 
 @pytest.fixture
 def mock_table_holder():
@@ -18,6 +19,10 @@ def test_remove_old_rows(sweeper, mock_table_holder):
         WHERE CREATIONTIME < NOW() - INTERVAL ? MINUTE
     ''', (60,))
     assert sweeper.total_requests == 1
+
+    # Verify OTEL logging
+    span = trace.get_current_span()
+    assert span.name == "remove_old_rows"
 
 def test_run(sweeper, mock_table_holder):
     with patch.object(sweeper, 'remove_old_rows') as mock_remove_old_rows:

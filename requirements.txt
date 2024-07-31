@@ -3,3 +3,7 @@ ray
 duckdb
 pytest
 pytest-mock
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-instrumentation
+opentelemetry-exporter-prometheus
