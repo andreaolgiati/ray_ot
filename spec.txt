@@ -1,0 +1,44 @@
+SCHEMA
+Create an application orchestrated using Ray, which has a number of W writers, U updaters and R readers from a table. 
+These are all implemented using Ray actors, each implemented in its own file, under "actors/"
+
+The table is stored in duckdb. Break the system down into separate files. Each actor should keep internal stats, such as total requests and requests/s (make sure you implement those and print them periodically).
+
+There is one table in duckdb, EVENTS. EVENTS has these columns:
+- ID (type: UUID), 
+- CREATIONTIME (TIMESTAMP), 
+- FEATURES (FLOAT[64]), 
+- RESULT (FLOAT between 0 and 1)
+- IMPRESSION (BOOLEAN) 
+- IMPRESSIONTIME (TIMESTAMP)
+- ENGAGEMENT (BOOLEAN)
+- ENGAGEMENTTIME (TIMESTAMP)
+
+List of actor types:
+
+TABLEHOLDER
+Singleton, holds the duckdb table. Also has a utility function that returns a random one of the UUIDs of the created rows, taken from a set held in memory.
+
+WRITERS
+Create a set of writers to add rows to this table. Each writer adds a number of rows in bulk, with random features.
+Each row must have NULL in the IMPRESSION and ENGAGEMENT columns. Also, all the UUIDs created are deposited into a set held in the Ray object store. Each writer must write a parameterizable number of rows per second.
+
+UPDATERS
+Create a set of updaters, whose only job is to update random rows (matched by UUID, read from the set created by the writers) with an IMPRESSION and IMPRESSIONTIME value and (with a programmable probability) an ENGAGEMENT and ENGAGEMENTTIME value. Each updater must update a parameterizable number of rows per second.
+
+READERS
+Create a set of readers. Each reader must be able to select a number of I rows where IMPRESSION is NULL and a number of P rows where IMPRESSION is not NULL (I and P are specified by the user). Each reader must read a parameterizable number of rows per second.
+
+SWEEPER
+Create a single sweeper whose role is to remove rows older than U minutes. 
+
+
+GENERAL
+- Make sure that all the constants (number of readers, writers, etc - number of rows read and written, etc) are defined in the main ray driver
+- Each actor runs an infinite loop
+- Create a complete, working program. Do not leave any components out
+- Do not put any SQL code (apart from table creation) in the tableholder, all in the sweeper, reader, writer, updater
+- put any constants in a separate file
+- Add plenty of comments
+
+
