@@ -4,12 +4,12 @@ import time
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.prometheus import PrometheusSpanExporter
+from opentelemetry.exporter.prometheus import PrometheusMetricsExporter
 
 # Initialize OTEL tracer
 trace.set_tracer_provider(TracerProvider())
 tracer = trace.get_tracer(__name__)
-span_processor = BatchSpanProcessor(PrometheusSpanExporter())
+span_processor = BatchSpanProcessor(PrometheusMetricsExporter())
 trace.get_tracer_provider().add_span_processor(span_processor)
 
 @ray.remote

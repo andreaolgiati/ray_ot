@@ -5,12 +5,12 @@ import time
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.prometheus import PrometheusSpanExporter
+from opentelemetry.exporter.prometheus import PrometheusMetricsExporter
 
 # Initialize OTEL tracer
 trace.set_tracer_provider(TracerProvider())
 tracer = trace.get_tracer(__name__)
-span_processor = BatchSpanProcessor(PrometheusSpanExporter())
+span_processor = BatchSpanProcessor(PrometheusMetricsExporter())
 trace.get_tracer_provider().add_span_processor(span_processor)
 
 @ray.remote
@@ -41,7 +41,7 @@ class Writer:
             for _ in range(rows_per_second):
                 self.add_row()
             elapsed_time = time.time() - start_time
-            time.sleep(max(0, 1 - elapsed_time))
+            time.sleep(max(0, 1 - elapsed time))
             self.print_stats()
 
     def print_stats(self):
