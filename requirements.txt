@@ -1,0 +1,5 @@
+# Required dependencies for the project
+ray
+duckdb
+pytest
+pytest-mock
