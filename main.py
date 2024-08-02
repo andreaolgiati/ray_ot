@@ -1,4 +1,5 @@
 import ray
+import time
 from constants import NUM_READERS, NUM_WRITERS, NUM_UPDATERS, ROWS_READ_PER_SECOND, ROWS_WRITTEN_PER_SECOND, ROWS_UPDATED_PER_SECOND, ROW_EXPIRATION_MINUTES
 from actors.tableholder import TableHolder
 from actors.writer import Writer
@@ -8,12 +9,12 @@ from actors.sweeper import Sweeper
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.prometheus import PrometheusMetricsExporter
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
 
 # Initialize OTEL tracer
 trace.set_tracer_provider(TracerProvider())
 tracer = trace.get_tracer(__name__)
-span_processor = BatchSpanProcessor(PrometheusMetricsExporter())
+span_processor = BatchSpanProcessor(PrometheusMetricReader())
 trace.get_tracer_provider().add_span_processor(span_processor)
 
 # Initialize Ray
@@ -32,7 +33,7 @@ updaters = [Updater.remote(table_holder) for _ in range(NUM_UPDATERS)]
 readers = [Reader.remote(table_holder) for _ in range(NUM_READERS)]
 
 # Start the SWEEPER actor
-sweeper = Sweeper.remote(table_holder)
+sweeper = Sweeper.remote(table_holder, ROW_EXPIRATION_MINUTES)
 
 # Add comments to explain each step
 # The TABLEHOLDER actor holds the duckdb table and provides a utility function to return a random UUID from the created rows.

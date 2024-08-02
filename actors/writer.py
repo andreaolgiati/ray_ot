@@ -5,23 +5,24 @@ import time
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.prometheus import PrometheusMetricsExporter
+from opentelemetry.exporter.prometheus import PrometheusMetricReader
 
-# Initialize OTEL tracer
-trace.set_tracer_provider(TracerProvider())
-tracer = trace.get_tracer(__name__)
-span_processor = BatchSpanProcessor(PrometheusMetricsExporter())
-trace.get_tracer_provider().add_span_processor(span_processor)
+
 
 @ray.remote
 class Writer:
     def __init__(self, table_holder):
+        # Initialize OTEL tracer
+        trace.set_tracer_provider(TracerProvider())
+        self.tracer = trace.get_tracer(__name__)
+        span_processor = BatchSpanProcessor(PrometheusMetricReader())
+        trace.get_tracer_provider().add_span_processor(span_processor)
         self.table_holder = table_holder
         self.total_requests = 0
         self.start_time = time.time()
 
     def add_row(self):
-        with tracer.start_as_current_span("add_row"):
+        with self.tracer.start_as_current_span("add_row"):
             # Generate random features and result
             features = [random.random() for _ in range(64)]
             result = random.random()
@@ -41,7 +42,7 @@ class Writer:
             for _ in range(rows_per_second):
                 self.add_row()
             elapsed_time = time.time() - start_time
-            time.sleep(max(0, 1 - elapsed time))
+            time.sleep(max(0, 1 - elapsed_time))
             self.print_stats()
 
     def print_stats(self):
