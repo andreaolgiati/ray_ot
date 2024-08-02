@@ -37,23 +37,11 @@ class TableHolder:
         self.uuids = set()
         # Log initialization
         logging.info("TableHolder initialized")
-        logging.info("""
-        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-       ||T ||||a ||||b ||||l ||||e ||||H ||||o ||||l ||||d ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||
-       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-        """)
 
     def add_row(self, features, result):
         with self.tracer.start_as_current_span("add_row"):
             # Log the current statement being executed
             logging.info("Executing add_row")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||A ||||d ||||d ||||i ||||n ||||g ||||  ||||a ||||  ||||r ||||o ||||w ||||  ||||  ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
             # Add a row to the table with random features and NULL in the IMPRESSION and ENGAGEMENT columns
             row_id = uuid.uuid4()
             creation_time = duckdb.query('SELECT NOW()').fetchone()[0]
@@ -68,12 +56,6 @@ class TableHolder:
         with self.tracer.start_as_current_span("get_random_uuid"):
             # Log the current statement being executed
             logging.info("Executing get_random_uuid")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||G ||||e ||||t ||||t ||||i ||||n ||||g ||||  ||||a ||||  ||||r ||||a ||||n ||||d ||||o ||||m ||||  ||||U ||||U ||||I ||||D ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
             # Return a random UUID from the created rows
             return random.choice(list(self.uuids))
 
@@ -81,11 +63,17 @@ class TableHolder:
         with self.tracer.start_as_current_span("get_table"):
             # Log the current statement being executed
             logging.info("Executing get_table")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||G ||||e ||||t ||||t ||||i ||||n ||||g ||||  ||||t ||||h ||||e ||||  ||||t ||||a ||||b ||||l ||||e ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
             # Return the table
             return self.conn.table('EVENTS')
+
+    def print_table_stats(self):
+        with self.tracer.start_as_current_span("print_table_stats"):
+            # Log the current statement being executed
+            logging.info("Executing print_table_stats")
+            # Get the number of rows in the table
+            num_rows = self.conn.execute('SELECT COUNT(*) FROM EVENTS').fetchone()[0]
+            # Get the number of statements in the table
+            num_statements = self.conn.execute('SELECT COUNT(DISTINCT ID) FROM EVENTS').fetchone()[0]
+            # Print the statistics
+            logging.info(f"Table stats: Number of rows: {num_rows}, Number of statements: {num_statements}")
+            print(f"Table stats: Number of rows: {num_rows}, Number of statements: {num_statements}")

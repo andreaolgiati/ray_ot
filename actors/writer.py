@@ -24,23 +24,11 @@ class Writer:
         self.start_time = time.time()
         # Log initialization
         logging.info("Writer initialized")
-        logging.info("""
-        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-       ||W ||||r ||||i ||||t ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||||a ||||l ||||i ||||z ||
-       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-        """)
 
     def add_row(self):
         with self.tracer.start_as_current_span("add_row"):
             # Log the current statement being executed
             logging.info("Executing add_row")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||A ||||d ||||d ||||i ||||n ||||g ||||  ||||a ||||  ||||r ||||o ||||w ||||  ||||  ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
             # Generate random features and result
             features = [random.random() for _ in range(64)]
             result = random.random()
@@ -64,12 +52,6 @@ class Writer:
             self.print_stats()
             # Log the current statement being executed
             logging.info("Executing run method")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||R ||||u ||||n ||||n ||||i ||||n ||||g ||||  ||||w ||||r ||||i ||||t ||||e ||||r ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
 
     def print_stats(self):
         elapsed_time = time.time() - self.start_time

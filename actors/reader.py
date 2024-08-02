@@ -22,23 +22,11 @@ class Reader:
         self.start_time = time.time()
         # Log initialization
         logging.info("Reader initialized")
-        logging.info("""
-        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-       ||R ||||e ||||a ||||d ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||||a ||||l ||||i ||||z ||
-       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-        """)
 
     def read_rows(self, impression_is_null, num_rows):
         with self.tracer.start_as_current_span("read_rows"):
             # Log the current statement being executed
             logging.info(f"Executing read_rows with impression_is_null={impression_is_null}, num_rows={num_rows}")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||R ||||e ||||a ||||d ||||i ||||n ||||g ||||  ||||r ||||o ||||w ||||s ||||  ||||  ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
             # Select rows based on the user-specified values
             if impression_is_null:
                 query = "SELECT * FROM EVENTS WHERE IMPRESSION IS NULL LIMIT ?"
@@ -58,12 +46,6 @@ class Reader:
             self.print_stats()
             # Log the current statement being executed
             logging.info("Executing run method")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||R ||||u ||||n ||||n ||||i ||||n ||||g ||||  ||||r ||||e ||||a ||||d ||||e ||||r ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
 
     def print_stats(self):
         elapsed_time = time.time() - self.start_time

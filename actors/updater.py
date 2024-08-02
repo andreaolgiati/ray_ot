@@ -22,23 +22,11 @@ class Updater:
         self.start_time = time.time()
         # Log initialization
         logging.info("Updater initialized")
-        logging.info("""
-        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-       ||U ||||p ||||d ||||a ||||t ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||||a ||||l ||||i ||||z ||
-       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-        """)
 
     def update_row(self):
         with self.tracer.start_as_current_span("update_row"):
             # Log the current statement being executed
             logging.info("Executing update_row")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||U ||||p ||||d ||||a ||||t ||||i ||||n ||||g ||||  ||||a ||||  ||||r ||||o ||||w ||||  ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
             # Get a random UUID from the table holder
             row_id = ray.get(self.table_holder.get_random_uuid.remote())
 
@@ -73,12 +61,6 @@ class Updater:
             self.print_stats()
             # Log the current statement being executed
             logging.info("Executing run method")
-            logging.info("""
-            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
-           ||R ||||u ||||n ||||n ||||i ||||n ||||g ||||  ||||u ||||p ||||d ||||a ||||t ||||e ||||r ||||  ||||  ||
-           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
-           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
-            """)
 
     def print_stats(self):
         elapsed_time = time.time() - self.start_time
