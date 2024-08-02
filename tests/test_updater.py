@@ -26,9 +26,19 @@ def test_update_row(updater, mock_table_holder):
     span = trace.get_current_span()
     assert span.name == "update_row"
 
+    # Verify logging
+    with patch('logging.info') as mock_logging_info:
+        updater.update_row()
+        mock_logging_info.assert_called_with("Executing update_row")
+
 def test_run(updater, mock_table_holder):
     with patch.object(updater, 'update_row') as mock_update_row:
         with patch('time.sleep', return_value=None):
             updater.run(1)
             mock_update_row.assert_called_once()
             assert updater.total_requests == 1
+
+def test_print_stats(updater):
+    with patch('logging.info') as mock_logging_info:
+        updater.print_stats()
+        mock_logging_info.assert_called()

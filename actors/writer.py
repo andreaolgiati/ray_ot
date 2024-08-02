@@ -2,12 +2,14 @@ import ray
 import random
 import uuid
 import time
+import logging
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.prometheus import PrometheusMetricReader
 
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @ray.remote
 class Writer:
@@ -20,9 +22,25 @@ class Writer:
         self.table_holder = table_holder
         self.total_requests = 0
         self.start_time = time.time()
+        # Log initialization
+        logging.info("Writer initialized")
+        logging.info("""
+        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+       ||W ||||r ||||i ||||t ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||||a ||||l ||||i ||||z ||
+       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+        """)
 
     def add_row(self):
         with self.tracer.start_as_current_span("add_row"):
+            # Log the current statement being executed
+            logging.info("Executing add_row")
+            logging.info("""
+            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+           ||A ||||d ||||d ||||i ||||n ||||g ||||  ||||a ||||  ||||r ||||o ||||w ||||  ||||  ||||  ||||  ||
+           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+            """)
             # Generate random features and result
             features = [random.random() for _ in range(64)]
             result = random.random()
@@ -44,8 +62,18 @@ class Writer:
             elapsed_time = time.time() - start_time
             time.sleep(max(0, 1 - elapsed_time))
             self.print_stats()
+            # Log the current statement being executed
+            logging.info("Executing run method")
+            logging.info("""
+            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+           ||R ||||u ||||n ||||n ||||i ||||n ||||g ||||  ||||w ||||r ||||i ||||t ||||e ||||r ||||  ||||  ||
+           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+            """)
 
     def print_stats(self):
         elapsed_time = time.time() - self.start_time
         requests_per_second = self.total_requests / elapsed_time
+        # Log the current statement being executed along with the statistics
+        logging.info(f"Executing print_stats: Total requests: {self.total_requests}, Requests per second: {requests_per_second:.2f}")
         print(f"Total requests: {self.total_requests}, Requests per second: {requests_per_second:.2f}")

@@ -1,5 +1,6 @@
 import ray
 import time
+import logging
 from constants import NUM_READERS, NUM_WRITERS, NUM_UPDATERS, ROWS_READ_PER_SECOND, ROWS_WRITTEN_PER_SECOND, ROWS_UPDATED_PER_SECOND, ROW_EXPIRATION_MINUTES
 from actors.tableholder import TableHolder
 from actors.writer import Writer
@@ -16,6 +17,9 @@ trace.set_tracer_provider(TracerProvider())
 tracer = trace.get_tracer(__name__)
 span_processor = BatchSpanProcessor(PrometheusMetricReader())
 trace.get_tracer_provider().add_span_processor(span_processor)
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Initialize Ray
 ray.init()
@@ -44,6 +48,9 @@ sweeper = Sweeper.remote(table_holder, ROW_EXPIRATION_MINUTES)
 
 # Add an infinite loop to print general stats
 while True:
+    # Log the current statement being executed
+    logging.info("Executing main loop: Printing general stats")
+    
     # Print general stats
     print("General stats:")
     print(f"Number of writers: {NUM_WRITERS}")
@@ -53,4 +60,8 @@ while True:
     print(f"Rows written per second: {ROWS_WRITTEN_PER_SECOND}")
     print(f"Rows updated per second: {ROWS_UPDATED_PER_SECOND}")
     print(f"Row expiration minutes: {ROW_EXPIRATION_MINUTES}")
+    
+    # Log the general stats
+    logging.info(f"General stats: Number of writers: {NUM_WRITERS}, Number of updaters: {NUM_UPDATERS}, Number of readers: {NUM_READERS}, Rows read per second: {ROWS_READ_PER_SECOND}, Rows written per second: {ROWS_WRITTEN_PER_SECOND}, Rows updated per second: {ROWS_UPDATED_PER_SECOND}, Row expiration minutes: {ROW_EXPIRATION_MINUTES}")
+    
     time.sleep(10)  # Print stats every 10 seconds

@@ -1,11 +1,13 @@
 import ray
 import time
+import logging
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.prometheus import PrometheusMetricReader
 
-
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @ray.remote
 class Sweeper:
@@ -20,9 +22,25 @@ class Sweeper:
         self.expiration_minutes = expiration_minutes
         self.total_requests = 0
         self.start_time = time.time()
+        # Log initialization
+        logging.info("Sweeper initialized")
+        logging.info("""
+        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+       ||S ||||w ||||e ||||e ||||p ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||||a ||||l ||||i ||||z ||
+       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+        """)
 
     def remove_old_rows(self):
         with self.tracer.start_as_current_span("remove_old_rows"):
+            # Log the current statement being executed
+            logging.info(f"Executing remove_old_rows with expiration_minutes={self.expiration_minutes}")
+            logging.info("""
+            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+           ||R ||||e ||||m ||||o ||||v ||||i ||||n ||||g ||||  ||||o ||||l ||||d ||||  ||||r ||||o ||||w ||||s ||
+           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+            """)
             # Remove rows older than the specified number of minutes
             self.table_holder.conn.execute('''
                 DELETE FROM EVENTS
@@ -37,8 +55,18 @@ class Sweeper:
             self.remove_old_rows()
             time.sleep(60)  # Run every minute
             self.print_stats()
+            # Log the current statement being executed
+            logging.info("Executing run method")
+            logging.info("""
+            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+           ||R ||||u ||||n ||||n ||||i ||||n ||||g ||||  ||||s ||||w ||||e ||||e ||||p ||||e ||||r ||||  ||||  ||
+           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+            """)
 
     def print_stats(self):
         elapsed_time = time.time() - self.start_time
         requests_per_second = self.total_requests / elapsed_time
+        # Log the current statement being executed along with the statistics
+        logging.info(f"Executing print_stats: Total requests: {self.total_requests}, Requests per second: {requests_per_second:.2f}")
         print(f"Total requests: {self.total_requests}, Requests per second: {requests_per_second:.2f}")

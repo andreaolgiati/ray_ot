@@ -1,15 +1,16 @@
 import ray
 import time
+import logging
 from opentelemetry import trace
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.prometheus import PrometheusMetricReader
 
-
-
 @ray.remote
 class Reader:
     def __init__(self, table_holder):
+        # Configure logging
+        logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
         # Initialize OTEL tracer
         trace.set_tracer_provider(TracerProvider())
         self.tracer = trace.get_tracer(__name__)
@@ -19,9 +20,25 @@ class Reader:
         self.table_holder = table_holder
         self.total_requests = 0
         self.start_time = time.time()
+        # Log initialization
+        logging.info("Reader initialized")
+        logging.info("""
+        ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+       ||R ||||e ||||a ||||d ||||e ||||r ||||  ||||i ||||n ||||i ||||t ||||i ||||a ||||l ||||i ||||z ||
+       ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+       |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+        """)
 
     def read_rows(self, impression_is_null, num_rows):
         with self.tracer.start_as_current_span("read_rows"):
+            # Log the current statement being executed
+            logging.info(f"Executing read_rows with impression_is_null={impression_is_null}, num_rows={num_rows}")
+            logging.info("""
+            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+           ||R ||||e ||||a ||||d ||||i ||||n ||||g ||||  ||||r ||||o ||||w ||||s ||||  ||||  ||||  ||||  ||
+           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+            """)
             # Select rows based on the user-specified values
             if impression_is_null:
                 query = "SELECT * FROM EVENTS WHERE IMPRESSION IS NULL LIMIT ?"
@@ -39,8 +56,18 @@ class Reader:
             elapsed_time = time.time() - start_time
             time.sleep(max(0, 1 - elapsed_time))
             self.print_stats()
+            # Log the current statement being executed
+            logging.info("Executing run method")
+            logging.info("""
+            ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____  ____ 
+           ||R ||||u ||||n ||||n ||||i ||||n ||||g ||||  ||||r ||||e ||||a ||||d ||||e ||||r ||||  ||||  ||
+           ||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||||__||
+           |/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\||/__\|
+            """)
 
     def print_stats(self):
         elapsed_time = time.time() - self.start_time
         requests_per_second = self.total_requests / elapsed_time
+        # Log the current statement being executed along with the statistics
+        logging.info(f"Executing print_stats: Total requests: {self.total_requests}, Requests per second: {requests_per_second:.2f}")
         print(f"Total requests: {self.total_requests}, Requests per second: {requests_per_second:.2f}")
